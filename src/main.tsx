@@ -9,8 +9,9 @@ if (!rootElement) throw new Error('Failed to find the root element');
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-console.log('Environment:', import.meta.env.MODE); // Debug log
-console.log('API URL:', import.meta.env.VITE_API_URL); // Debug log
+if (!GOOGLE_CLIENT_ID) {
+  throw new Error('Google Client ID is not configured in environment variables');
+}
 
 createRoot(rootElement).render(
   <StrictMode>

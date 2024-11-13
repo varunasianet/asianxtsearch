@@ -14,7 +14,7 @@ export default function Login() {
     try {
       console.log('Google response:', credentialResponse);
       
-      const response = await fetch('https://35.207.211.198.nip.io/api/v1/auth/google', {
+      const response = await fetch('https://huduku.asianetnews.com/api/v1/auth/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,15 +49,14 @@ export default function Login() {
     }
   };
   
-  
   return (
     <div className="flex-1 flex items-center justify-center bg-[#1A1D21] p-8">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-white text-center mb-2">
-          Welcome to Asianxt Search
+          Welcome to Huduku AI
         </h1>
         <p className="text-gray-400 text-center mb-8">
-          Sign in or sign up to continue
+          Your Intelligent News Companion
         </p>
 
         {error && (
