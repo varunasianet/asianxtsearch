@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen }) {
             <ArrowLeft size={20} className="text-white" />
           )}
           <Logo size="sm" />
-          <span className="text-white text-xl font-semibold">Asianxt Search</span>
+          <span className="text-white text-xl font-semibold">Huduku AI</span>
         </button>
       </div>
 

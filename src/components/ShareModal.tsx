@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Facebook, Twitter, Share2 } from 'lucide-react';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -16,8 +16,20 @@ Question: ${query}
 
 Answer: ${answer}
 
-Powered by My Asianxt Search
+Powered by Asianxt Search
   `.trim();
+
+  const encodedText = encodeURIComponent(shareText);
+
+  const shareLinks = {
+    whatsapp: `https://wa.me/?text=${encodedText}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodedText}`,
+    twitter: `https://twitter.com/intent/tweet?text=${encodedText}`
+  };
+
+  const handleShare = (platform: keyof typeof shareLinks) => {
+    window.open(shareLinks[platform], '_blank', 'width=550,height=450');
+  };
 
   const handleCopy = async () => {
     try {
@@ -40,10 +52,36 @@ Powered by My Asianxt Search
         
         <h2 className="text-white text-xl font-medium mb-4">Share this result</h2>
         
-        <div className="bg-black rounded-lg p-4 mb-4">
+        <div className="bg-black rounded-lg p-4 mb-6">
           <pre className="text-gray-400 whitespace-pre-wrap text-sm">
             {shareText}
           </pre>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <button
+            onClick={() => handleShare('whatsapp')}
+            className="flex flex-col items-center gap-2 p-4 bg-[#25D366] hover:bg-opacity-90 rounded-lg transition-colors"
+          >
+            <Share2 size={24} className="text-white" />
+            <span className="text-white text-sm">WhatsApp</span>
+          </button>
+
+          <button
+            onClick={() => handleShare('facebook')}
+            className="flex flex-col items-center gap-2 p-4 bg-[#1877F2] hover:bg-opacity-90 rounded-lg transition-colors"
+          >
+            <Facebook size={24} className="text-white" />
+            <span className="text-white text-sm">Facebook</span>
+          </button>
+
+          <button
+            onClick={() => handleShare('twitter')}
+            className="flex flex-col items-center gap-2 p-4 bg-black hover:bg-opacity-90 rounded-lg transition-colors"
+          >
+            <Twitter size={24} className="text-white" />
+            <span className="text-white text-sm">X (Twitter)</span>
+          </button>
         </div>
 
         <div className="flex justify-end gap-3">

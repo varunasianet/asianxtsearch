@@ -1,4 +1,5 @@
 import React from 'react';
+import { Search } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'lg';
@@ -9,12 +10,8 @@ export default function Logo({ size = 'sm', className = '' }: LogoProps) {
   const dimensions = size === 'lg' ? 64 : 32;
   
   return (
-    <img 
-      src="/home/varun_saagar/asianxtsearch/src/Anxt_Search_logo.svg"
-      width={dimensions} 
-      height={dimensions} 
-      alt="Asianxt Search Logo"
-      className={className}
-    />
+    <div className={`flex items-center justify-center ${className}`} style={{ width: dimensions, height: dimensions }}>
+      <Search size={dimensions} className="text-[#00A3A3]" />
+    </div>
   );
 }

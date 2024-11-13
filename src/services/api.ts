@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://35.207.211.198.nip.io/api/v1';
+const API_BASE_URL = 'https://huduku.asianetnews.com/api/v1';
 
 interface QueryParams {
   query: string;
@@ -122,7 +122,7 @@ export const api = {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Origin': 'https://35.207.211.198.nip.io'
+                'Origin': 'https://huduku.asianetnews.com'
             },
             credentials: 'include',
             mode: 'cors',
