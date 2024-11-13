@@ -18,12 +18,10 @@ export default function Login() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify({
           token: credentialResponse.credential
         }),
-        credentials: 'include',
       });
   
       console.log('Response status:', response.status);
@@ -32,32 +30,19 @@ export default function Login() {
       const responseText = await response.text();
       console.log('Response text:', responseText);
   
-      try {
-        const data = JSON.parse(responseText);
-        
-        if (!response.ok) {
-          throw new Error(data.detail || 'Authentication failed');
-        }
-  
-        // Store token and user data
-        localStorage.setItem('token', data.access_token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Update context
-        setUser(data.user);
-        
-        // Log success
-        console.log('Authentication successful:', data.user);
-        
-        // Navigate to home
-        navigate('/');
-        
-      } catch (parseError) {
-        console.error('Failed to parse JSON:', parseError);
-        console.error('Raw response:', responseText);
-        throw new Error('Server returned invalid JSON');
+      if (!responseText) {
+        throw new Error('Empty response from server');
       }
   
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Authentication failed');
+      }
+  
+      localStorage.setItem('token', data.access_token);
+      setUser(data.user);
+      navigate('/');
     } catch (error) {
       console.error('Login error:', error);
       setError(error instanceof Error ? error.message : 'Authentication failed. Please try again.');
@@ -65,12 +50,11 @@ export default function Login() {
   };
   
   
-  
   return (
     <div className="flex-1 flex items-center justify-center bg-[#1A1D21] p-8">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-white text-center mb-2">
-          Welcome to asianer news pro
+          Welcome to Asianxt Search
         </h1>
         <p className="text-gray-400 text-center mb-8">
           Sign in or sign up to continue

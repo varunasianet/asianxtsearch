@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowUpRight, MessageSquare } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { api } from '../services/api';
+import SearchResult from '../components/SearchResult';
 
 interface Source {
   number: number;
@@ -31,7 +32,7 @@ const LoadingAnimation = () => (
     {[...Array(3)].map((_, i) => (
       <div
         key={i}
-        className="w-3 h-3 rounded-full bg-cyan-400"
+        className="w-3 h-3 rounded-full bg-white"
         style={{
           animation: 'floating 1s ease-in-out infinite',
           animationDelay: `${i * 0.2}s`
@@ -47,7 +48,15 @@ export default function Chat() {
   const [inputValue, setInputValue] = useState('');
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const sourcesRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const initialQuery = location.state?.initialQuery;
@@ -121,64 +130,30 @@ export default function Chat() {
   return (
     <div className="flex-1 flex flex-col h-screen bg-black">
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {messages.map((message) => (
+        {messages.map((message, index) => (
           <div
             key={message.id}
-            className={`max-w-4xl mx-auto ${
-              message.type === 'user' ? 'text-white' : ''
-            }`}
+            className="max-w-4xl mx-auto"
           >
             <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">
                 {message.type === 'user' ? (
                   'U'
                 ) : (
-                  <MessageSquare size={16} className="text-cyan-400" />
+                  <MessageSquare size={16} className="text-white" />
                 )}
               </div>
               <div className="flex-1">
-                <div className="text-white whitespace-pre-wrap">
-                  {message.content}
-                </div>
-                {message.sources && (
-                  <div className="mt-4 space-y-2" ref={sourcesRef}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {message.sources.map((source, index) => (
-                        <div
-                          key={index}
-                          className="bg-zinc-900 rounded-lg p-4 hover:bg-zinc-800 transition-colors source-item"
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-sm text-gray-400 flex-shrink-0">
-                              {source.number}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <a
-                                href={source.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-cyan-400 hover:text-cyan-300 truncate block mb-2"
-                              >
-                                {source.url}
-                              </a>
-                              <p className="text-gray-400 text-sm mt-2 line-clamp-3">
-                                {source.text}
-                              </p>
-                              <a
-                                href={source.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-2 inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-                              >
-                                Read more
-                                <ArrowUpRight size={12} />
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                {message.type === 'user' ? (
+                  <div className="text-white whitespace-pre-wrap">
+                    {message.content}
                   </div>
+                ) : (
+                  <SearchResult
+                    content={message.content}
+                    sources={message.sources}
+                    query={messages[index - 1]?.content || ''}
+                  />
                 )}
               </div>
             </div>
@@ -189,7 +164,7 @@ export default function Chat() {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">
-                <MessageSquare size={16} className="text-cyan-400" />
+                <MessageSquare size={16} className="text-white" />
               </div>
               <div className="flex-1">
                 <div className="bg-zinc-900 rounded-lg p-2 inline-block">
@@ -199,6 +174,7 @@ export default function Chat() {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
   
       <div className="border-t border-zinc-800 p-4">
@@ -209,13 +185,13 @@ export default function Chat() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask a follow-up question..."
-              className="w-full bg-zinc-900 text-white rounded-xl py-4 px-6 pr-24 outline-none focus:ring-2 focus:ring-cyan-400/20"
+              className="w-full bg-zinc-900 text-white rounded-xl py-4 px-6 pr-24 outline-none focus:ring-2 focus:ring-white/20"
               disabled={loading}
             />
             <button
               type="submit"
               disabled={loading}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#00A3A3] text-white rounded-lg px-4 py-2 flex items-center gap-2 hover:bg-[#00B3B3] transition-colors disabled:opacity-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-black rounded-lg px-4 py-2 flex items-center gap-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
               <span>{loading ? 'Thinking...' : 'Send'}</span>
               <ArrowUpRight size={16} />
