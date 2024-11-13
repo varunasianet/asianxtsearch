@@ -25,7 +25,6 @@ const floatingDotsAnimation = `
   }
 `;
 
-// Add this new component for the loading animation
 const LoadingAnimation = () => (
   <div className="flex items-center gap-2 p-4">
     <style>{floatingDotsAnimation}</style>
@@ -42,54 +41,13 @@ const LoadingAnimation = () => (
   </div>
 );
 
-
-const extractDomain = (url: string) => {
-  try {
-    const domain = new URL(url).hostname.replace('www.', '');
-    return domain;
-  } catch {
-    return url;
-  }
-};
-
-const formatDate = (url: string) => {
-  try {
-    const urlObj = new URL(url);
-    const pathSegments = urlObj.pathname.split('/');
-    const datePattern = /\d{4}\/\d{2}\/\d{2}/;
-    const dateSegment = pathSegments.find(segment => datePattern.test(segment));
-    
-    if (dateSegment) {
-      const [year, month, day] = dateSegment.split('/');
-      return new Date(`${year}-${month}-${day}`).toLocaleDateString();
-    }
-    return '';
-  } catch {
-    return '';
-  }
-};
-
-
 export default function Chat() {
   const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const sourcesRef = useRef<HTMLDivElement>(null); 
-
-  useEffect(() => {
-    if (sourcesRef.current) {
-      const sourcesContainer = sourcesRef.current;
-      const sources = sourcesContainer.querySelectorAll('.source-item'); 
-
-      if (sources.length > 2) {
-        // Make the container scrollable if there are more than 2 sources
-        sourcesContainer.style.overflowY = 'auto'; 
-        sourcesContainer.style.maxHeight = '300px'; // Set a max height for the scrollable area
-      }
-    }
-  }, [messages]); 
+  const sourcesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initialQuery = location.state?.initialQuery;
@@ -97,15 +55,6 @@ export default function Chat() {
       handleInitialQuery(initialQuery);
     }
   }, [location.state]);
-
-  const formatSources = (citations: any[]) => {
-    return citations.map((citation, index) => ({
-      number: index + 1,
-      url: citation.url,
-      title: citation.title || `Source ${index + 1}`,
-      text: citation.text || ''
-    }));
-  };
 
   const handleInitialQuery = async (query: string) => {
     try {
@@ -124,7 +73,7 @@ export default function Chat() {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
         content: response.answer,
-        sources: formatSources(response.citations)
+        sources: response.citations
       };
 
       setMessages([userMessage, aiMessage]);
@@ -156,7 +105,7 @@ export default function Chat() {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
         content: response.answer,
-        sources: formatSources(response.citations)
+        sources: response.citations
       };
 
       setMessages([...messages, userMessage, aiMessage]);
@@ -169,59 +118,8 @@ export default function Chat() {
     }
   };
 
-  const renderSources = (sources: Source[]) => {
-    if (!sources || sources.length === 0) return null;
-
-    return (
-      <div className="mt-4 space-y-2" ref={sourcesRef}> {/* Add the ref here */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {sources.map((source, index) => (
-            <div 
-              key={index} 
-              className="bg-[#2D3135] rounded-lg p-4 hover:bg-[#363A3F] transition-colors source-item" 
-            
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#1A1D21] flex items-center justify-center text-sm text-gray-400 flex-shrink-0">
-                  {source.number}
-                </div>
-                <div className="flex-1 min-w-0">
-                  {/* URL */}
-                  <a 
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-cyan-400 hover:text-cyan-300 truncate block mb-2"
-                  >
-                    {source.url}
-                  </a>
-                  
-                  {/* Source Text */}
-                  <p className="text-gray-400 text-sm mt-2 line-clamp-3">
-                    {source.text}
-                  </p>
-                  
-                  {/* Read More Link */}
-                  <a
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-                  >
-                    Read more
-                    <ArrowUpRight size={12} />
-                  </a>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-  
   return (
-    <div className="flex-1 flex flex-col h-screen bg-[#1A1D21]">
+    <div className="flex-1 flex flex-col h-screen bg-black">
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.map((message) => (
           <div
@@ -231,7 +129,7 @@ export default function Chat() {
             }`}
           >
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-[#2D3135] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">
                 {message.type === 'user' ? (
                   'U'
                 ) : (
@@ -242,21 +140,59 @@ export default function Chat() {
                 <div className="text-white whitespace-pre-wrap">
                   {message.content}
                 </div>
-                {message.sources && renderSources(message.sources)}
+                {message.sources && (
+                  <div className="mt-4 space-y-2" ref={sourcesRef}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {message.sources.map((source, index) => (
+                        <div
+                          key={index}
+                          className="bg-zinc-900 rounded-lg p-4 hover:bg-zinc-800 transition-colors source-item"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-sm text-gray-400 flex-shrink-0">
+                              {source.number}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-cyan-400 hover:text-cyan-300 truncate block mb-2"
+                              >
+                                {source.url}
+                              </a>
+                              <p className="text-gray-400 text-sm mt-2 line-clamp-3">
+                                {source.text}
+                              </p>
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                              >
+                                Read more
+                                <ArrowUpRight size={12} />
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         ))}
         
-        {/* Add loading animation when waiting for response */}
         {loading && (
           <div className="max-w-4xl mx-auto">
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-[#2D3135] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">
                 <MessageSquare size={16} className="text-cyan-400" />
               </div>
               <div className="flex-1">
-                <div className="bg-[#2D3135] rounded-lg p-2 inline-block">
+                <div className="bg-zinc-900 rounded-lg p-2 inline-block">
                   <LoadingAnimation />
                 </div>
               </div>
@@ -265,8 +201,7 @@ export default function Chat() {
         )}
       </div>
   
-      {/* Input Form */}
-      <div className="border-t border-gray-800 p-4">
+      <div className="border-t border-zinc-800 p-4">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="relative">
             <input
@@ -274,7 +209,7 @@ export default function Chat() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask a follow-up question..."
-              className="w-full bg-[#2D3135] text-white rounded-xl py-4 px-6 pr-24 outline-none focus:ring-2 focus:ring-cyan-400/20"
+              className="w-full bg-zinc-900 text-white rounded-xl py-4 px-6 pr-24 outline-none focus:ring-2 focus:ring-cyan-400/20"
               disabled={loading}
             />
             <button
@@ -291,4 +226,3 @@ export default function Chat() {
     </div>
   );
 }
-

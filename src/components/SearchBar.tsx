@@ -36,7 +36,7 @@ export default function SearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search anything..."
-          className="w-full bg-[#2D3135] text-white rounded-xl py-4 pl-12 pr-24 outline-none"
+          className="w-full bg-zinc-900 text-white rounded-xl py-4 pl-12 pr-24 outline-none focus:ring-2 focus:ring-cyan-400/20"
           disabled={loading}
         />
         <div className="absolute left-4 top-1/2 -translate-y-1/2">

@@ -1,4 +1,3 @@
-// SuggestedQueries.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { Mountain, ThumbsUp, TrendingUp, Tv, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -51,10 +50,10 @@ const QueryCard: React.FC<QueryCardProps> = ({ icon, title, onClick }) => {
   return (
     <button 
       onClick={onClick}
-      className="bg-[#2D3135] rounded-xl p-4 text-left hover:bg-[#363A3F] transition-colors w-full"
+      className="bg-zinc-900 rounded-xl p-4 text-left hover:bg-zinc-800 transition-colors w-full"
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#1A1D21] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
           {icon}
         </div>
         <span className="text-white font-medium line-clamp-2">{title}</span>
@@ -74,7 +73,6 @@ const SuggestedQueries: React.FC = () => {
     const now = Date.now();
     const timeSinceLastFetch = now - lastFetchTime;
     
-    // Only fetch if more than 1 minute has passed since last fetch
     if (timeSinceLastFetch < 60000) {
       return;
     }
@@ -83,15 +81,12 @@ const SuggestedQueries: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching queries...'); // Debug log
       const data = await api.getSuggestedQueries();
-      console.log('Received data:', data); // Debug log
       
       if (data?.queries && Array.isArray(data.queries)) {
         setQueries(data.queries);
         setLastFetchTime(now);
       } else {
-        console.warn('Invalid data structure:', data);
         throw new Error('Invalid data structure received from server');
       }
     } catch (error) {
@@ -110,12 +105,11 @@ const SuggestedQueries: React.FC = () => {
     const initFetch = async () => {
       if (mounted) {
         await fetchQueries();
-        // Set up interval for subsequent fetches
         intervalId = setInterval(() => {
           if (mounted) {
             fetchQueries();
           }
-        }, 30 * 60 * 1000); // 30 minutes
+        }, 30 * 60 * 1000);
       }
     };
 

@@ -16,8 +16,8 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, text }) => (
     className={({ isActive }) =>
       `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
         isActive
-          ? 'bg-[#2D3135] text-white'
-          : 'text-gray-400 hover:bg-[#2D3135] hover:text-white'
+          ? 'bg-zinc-900 text-white'
+          : 'text-gray-400 hover:bg-zinc-900 hover:text-white'
       }`
     }
   >
@@ -26,7 +26,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, text }) => (
   </NavLink>
 );
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+export default function Sidebar({ isOpen }) {
   const navigate = useNavigate();
   const { user, isLoading } = useUser();
 
@@ -35,7 +35,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   }
 
   return (
-    <div className={`w-64 h-screen bg-[#1A1D21] border-r border-gray-800 p-4 flex flex-col ${isOpen ? '' : 'hidden'}`}>
+    <div className={`w-64 h-screen bg-black border-r border-zinc-800 p-4 flex flex-col ${isOpen ? '' : 'hidden'}`}>
       <button 
         onClick={() => navigate('/')} 
         className="flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity"
@@ -44,7 +44,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         <span className="text-white text-xl font-semibold">Asianet News Pro</span>
       </button>
       
-      <button className="w-full bg-[#2D3135] text-white rounded-full py-2 px-4 mb-6 flex items-center gap-2">
+      <button className="w-full bg-zinc-900 text-white rounded-full py-2 px-4 mb-6 flex items-center gap-2">
         <span>New Thread</span>
         <span className="text-gray-400 text-sm">Ctrl I</span>
       </button>
@@ -73,7 +73,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       )}
 
       <div className="mt-auto">
-        <div className="bg-[#2D3135] rounded-lg p-4">
+        <div className="bg-zinc-900 rounded-lg p-4">
           <h3 className="text-white font-medium mb-2">Try Pro</h3>
           <p className="text-gray-400 text-sm mb-3">
             Upgrade for image upload, smarter AI, and more Pro Search.
