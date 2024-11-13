@@ -39,121 +39,90 @@ interface SuggestedQueriesResponse {
   next_update: string;
 }
 
-interface ApiError {
-  name: string;
-  message: string;
-  stack?: string;
-}
-
-
-// Error handler utility
-const handleApiError = async (response: Response, defaultMessage: string): Promise<never> => {
-  try {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || defaultMessage);
-  } catch (error) {
-    throw new Error(defaultMessage);
-  }
-};
-
-
-// Helper function to handle errors
-const handleError = (error: unknown, context: string): never => {
-  const apiError: ApiError = {
-    name: error instanceof Error ? error.name : 'Unknown Error',
-    message: error instanceof Error ? error.message : 'An unknown error occurred',
-    stack: error instanceof Error ? error.stack : undefined
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
-  
-  console.error(`${context}:`, apiError);
-  throw error;
 };
 
+// Helper function to handle API responses
+const handleResponse = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || errorData.detail || `HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
 
 export const api = {
   async search(params: QueryParams) {
-    const response = await fetch(`${API_BASE_URL}/search`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || 'Search failed');
+    try {
+      const response = await fetch(`${API_BASE_URL}/search`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(params),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Search failed:', error);
+      throw error;
     }
-    return response.json();
   },
 
   async generate(params: QueryParams, conversationId?: string): Promise<GenerateResponse> {
-    const url = `${API_BASE_URL}/generate${conversationId ? `?conversation_id=${conversationId}` : ''}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || 'Generation failed');
+    try {
+      const url = `${API_BASE_URL}/generate${conversationId ? `?conversation_id=${conversationId}` : ''}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(params),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Generation failed:', error);
+      throw error;
     }
-    return response.json();
   },
 
   async getConversation(conversationId: string) {
-    const response = await fetch(`${API_BASE_URL}/conversation/${conversationId}`);
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || 'Failed to fetch conversation');
+    try {
+      const response = await fetch(`${API_BASE_URL}/conversation/${conversationId}`, {
+        headers: getAuthHeaders(),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Failed to fetch conversation:', error);
+      throw error;
     }
-    return response.json();
   },
 
   async getSuggestedQueries(): Promise<SuggestedQueriesResponse> {
-    console.log('=== Starting getSuggestedQueries API call ===');
     try {
-        const url = `${API_BASE_URL}/suggested-queries`;
-        console.log('Fetching from URL:', url);
-        
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Origin': 'https://huduku.asianetnews.com'
-            },
-            credentials: 'include',
-            mode: 'cors',
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error response:', errorText);
-            throw new Error(`Failed to fetch suggested queries: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('Received data:', data);
-        return data;
+      const response = await fetch(`${API_BASE_URL}/suggested-queries`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+      return handleResponse<SuggestedQueriesResponse>(response);
     } catch (error) {
-        console.error('API Error details:', error);
-        throw error;
+      console.error('Failed to fetch suggested queries:', error);
+      throw error;
     }
-},
+  },
 
   async deleteConversation(conversationId: string) {
-    const response = await fetch(`${API_BASE_URL}/conversation/${conversationId}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || 'Failed to delete conversation');
+    try {
+      const response = await fetch(`${API_BASE_URL}/conversation/${conversationId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Failed to delete conversation:', error);
+      throw error;
     }
-    return response.json();
   },
 };

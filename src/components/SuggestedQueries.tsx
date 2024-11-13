@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Mountain, ThumbsUp, TrendingUp, Tv, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import LoadingSpinner from './LoadingSpinner';
 
 interface QueryData {
   query: string;
@@ -11,12 +12,6 @@ interface QueryData {
   priority?: number;
   timestamp?: string;
   news_title?: string;
-}
-
-interface QueryCardProps {
-  icon: React.ReactNode;
-  title: string;
-  onClick: () => void;
 }
 
 const FALLBACK_QUERIES: QueryData[] = [
@@ -46,119 +41,90 @@ const FALLBACK_QUERIES: QueryData[] = [
   }
 ];
 
-const QueryCard: React.FC<QueryCardProps> = ({ icon, title, onClick }) => {
-  return (
-    <button 
-      onClick={onClick}
-      className="bg-zinc-900 rounded-xl p-4 text-left hover:bg-zinc-800 transition-colors w-full"
-    >
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
-          {icon}
-        </div>
-        <span className="text-white font-medium line-clamp-2">{title}</span>
+const QueryCard: React.FC<{ icon: React.ReactNode; title: string; onClick: () => void }> = ({ 
+  icon, 
+  title, 
+  onClick 
+}) => (
+  <button 
+    onClick={onClick}
+    className="bg-zinc-900 rounded-xl p-4 text-left hover:bg-zinc-800 transition-colors w-full"
+  >
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
+        {icon}
       </div>
-    </button>
-  );
-};
+      <span className="text-white font-medium line-clamp-2">{title}</span>
+    </div>
+  </button>
+);
 
-const SuggestedQueries: React.FC = () => {
+export default function SuggestedQueries() {
   const navigate = useNavigate();
   const [queries, setQueries] = useState<QueryData[]>(FALLBACK_QUERIES);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   const fetchQueries = useCallback(async () => {
-    const now = Date.now();
-    const timeSinceLastFetch = now - lastFetchTime;
-    
-    if (timeSinceLastFetch < 60000) {
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
-      
       const data = await api.getSuggestedQueries();
       
       if (data?.queries && Array.isArray(data.queries)) {
         setQueries(data.queries);
-        setLastFetchTime(now);
+        setRetryCount(0); // Reset retry count on success
       } else {
-        throw new Error('Invalid data structure received from server');
+        throw new Error('Invalid data structure received');
       }
     } catch (error) {
       console.error('Error fetching queries:', error);
-      setError('Unable to fetch latest queries. Showing default suggestions.');
-      setQueries(FALLBACK_QUERIES);
+      if (retryCount < MAX_RETRIES) {
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => fetchQueries(), 2000 * (retryCount + 1)); // Exponential backoff
+      } else {
+        setError('Unable to fetch latest queries. Showing default suggestions.');
+        setQueries(FALLBACK_QUERIES);
+      }
     } finally {
       setLoading(false);
     }
-  }, [lastFetchTime]);
+  }, [retryCount]);
 
   useEffect(() => {
-    let mounted = true;
-    let intervalId: NodeJS.Timeout;
-
-    const initFetch = async () => {
-      if (mounted) {
-        await fetchQueries();
-        intervalId = setInterval(() => {
-          if (mounted) {
-            fetchQueries();
-          }
-        }, 30 * 60 * 1000);
-      }
-    };
-
-    initFetch();
-
-    return () => {
-      mounted = false;
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
+    fetchQueries();
   }, [fetchQueries]);
 
-  const handleQueryClick = useCallback((query: string) => {
+  const handleQueryClick = (query: string) => {
     navigate('/chat', { state: { initialQuery: query } });
-  }, [navigate]);
+  };
 
-  const getIcon = useCallback((iconName: string): React.ReactNode => {
+  const getIcon = (iconName: string): React.ReactNode => {
+    const iconProps = { className: "w-6 h-6 text-current" };
     switch (iconName.toLowerCase()) {
-      case 'trending-up':
-        return <TrendingUp className="w-6 h-6 text-current" />;
-      case 'tv':
-        return <Tv className="w-6 h-6 text-current" />;
-      case 'mountain':
-        return <Mountain className="w-6 h-6 text-current" />;
-      case 'thumbs-up':
-        return <ThumbsUp className="w-6 h-6 text-current" />;
-      case 'globe':
-        return <Globe className="w-6 h-6 text-current" />;
-      default:
-        return <TrendingUp className="w-6 h-6 text-current" />;
+      case 'trending-up': return <TrendingUp {...iconProps} />;
+      case 'tv': return <Tv {...iconProps} />;
+      case 'mountain': return <Mountain {...iconProps} />;
+      case 'thumbs-up': return <ThumbsUp {...iconProps} />;
+      case 'globe': return <Globe {...iconProps} />;
+      default: return <TrendingUp {...iconProps} />;
     }
-  }, []);
+  };
 
-  const getColorClass = useCallback((color: string): string => {
-    const colorMap: Record<string, string> = {
-      blue: 'text-blue-500',
-      purple: 'text-purple-500',
-      green: 'text-green-500',
-      yellow: 'text-yellow-500'
-    };
-    return colorMap[color] || 'text-blue-500';
-  }, []);
+  const getColorClass = (color: string): string => ({
+    blue: 'text-blue-500',
+    purple: 'text-purple-500',
+    green: 'text-green-500',
+    yellow: 'text-yellow-500'
+  }[color] || 'text-blue-500');
 
   return (
     <div className="w-full max-w-3xl mt-6 px-4">
       {loading && (
         <div className="text-center mb-4">
-          <div className="animate-pulse text-gray-400">Loading suggestions...</div>
+          <LoadingSpinner />
         </div>
       )}
       
@@ -184,6 +150,4 @@ const SuggestedQueries: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default SuggestedQueries;
+}

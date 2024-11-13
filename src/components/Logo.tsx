@@ -1,5 +1,4 @@
 import React from 'react';
-import { Search } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'lg';
@@ -11,7 +10,12 @@ export default function Logo({ size = 'sm', className = '' }: LogoProps) {
   
   return (
     <div className={`flex items-center justify-center ${className}`} style={{ width: dimensions, height: dimensions }}>
-      <Search size={dimensions} className="text-[#00A3A3]" />
+      <img 
+        src="/assets/Huduku_ai_logo.svg" 
+        alt="Huduku AI Logo"
+        className="w-full h-full"
+        style={{ width: dimensions, height: dimensions }}
+      />
     </div>
   );
 }

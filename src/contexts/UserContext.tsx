@@ -1,4 +1,3 @@
-// src/contexts/UserContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
@@ -24,22 +23,36 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const checkAuthStatus = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (token) {
-          const response = await fetch('http://localhost:8000/api/v1/auth/status', {
+        const storedUser = localStorage.getItem('user');
+
+        if (token && storedUser) {
+          // First try to use stored user data for immediate UI update
+          setUser(JSON.parse(storedUser));
+
+          // Then verify token with backend
+          const response = await fetch('https://huduku.asianetnews.com/api/v1/auth/status', {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
             }
           });
+
           if (response.ok) {
             const data = await response.json();
             setUser(data.user);
+            localStorage.setItem('user', JSON.stringify(data.user));
           } else {
+            // If token is invalid, clear storage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            setUser(null);
           }
+        } else {
+          setUser(null);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -48,8 +61,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     checkAuthStatus();
   }, []);
 
+  // Update local storage when user state changes
+  const handleSetUser = (newUser: User | null) => {
+    setUser(newUser);
+    if (newUser) {
+      localStorage.setItem('user', JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser, isLoading }}>
+    <UserContext.Provider value={{ user, setUser: handleSetUser, isLoading }}>
       {children}
     </UserContext.Provider>
   );

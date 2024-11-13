@@ -46,7 +46,7 @@ export default function Sidebar({ isOpen }) {
 
   return (
     <div className={`w-64 h-screen bg-black border-r border-zinc-800 p-4 flex flex-col ${isOpen ? '' : 'hidden lg:flex'}`}>
-      <div className="h-14 flex items-center"> {/* Fixed height header */}
+      <div className="h-14 flex items-center gap-3">
         <button 
           onClick={handleNavigation}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
@@ -55,7 +55,10 @@ export default function Sidebar({ isOpen }) {
             <ArrowLeft size={20} className="text-white" />
           )}
           <Logo size="sm" />
-          <span className="text-white text-xl font-semibold">Huduku AI</span>
+          <div className="flex flex-col">
+            <span className="text-white text-xl font-semibold">Huduku AI</span>
+            <span className="text-gray-400 text-xs">Powered by Asianxt</span>
+          </div>
         </button>
       </div>
 

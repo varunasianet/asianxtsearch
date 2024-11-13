@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Facebook, Twitter, Share2 } from 'lucide-react';
+import { X, Facebook, Twitter, Share2, Link2 } from 'lucide-react';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ Question: ${query}
 
 Answer: ${answer}
 
-Powered by Asianxt Search
+Huduku AI - Powered by Asianxt
   `.trim();
 
   const encodedText = encodeURIComponent(shareText);
@@ -93,9 +93,10 @@ Powered by Asianxt Search
           </button>
           <button
             onClick={handleCopy}
-            className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2"
           >
-            Copy to Clipboard
+            <Link2 size={16} />
+            <span>Copy Link</span>
           </button>
         </div>
       </div>

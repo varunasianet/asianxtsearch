@@ -7,11 +7,8 @@ import './index.css';
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-if (!GOOGLE_CLIENT_ID) {
-  throw new Error('Google Client ID is not configured in environment variables');
-}
+// Use a default development Client ID if environment variable is not set
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '660547745814-n5ke73e3ij95c7gp7t36n617gm6ea44e.apps.googleusercontent.com';
 
 createRoot(rootElement).render(
   <StrictMode>

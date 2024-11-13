@@ -1,46 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import { Apple } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 
 export default function Login() {
   const { setUser } = useUser();
-  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      console.log('Google response:', credentialResponse);
+      setError(null);
       
       const response = await fetch('https://huduku.asianetnews.com/api/v1/auth/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           token: credentialResponse.credential
         }),
       });
-  
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-  
-      if (!responseText) {
-        throw new Error('Empty response from server');
-      }
-  
-      const data = JSON.parse(responseText);
-      
+
       if (!response.ok) {
-        throw new Error(data.detail || 'Authentication failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Authentication failed');
       }
-  
+
+      const data = await response.json();
+
+      if (!data.access_token || !data.user) {
+        throw new Error('Invalid response from server');
+      }
+
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
       setUser(data.user);
       navigate('/');
     } catch (error) {
@@ -70,7 +66,6 @@ export default function Login() {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => {
-                console.log('Login Failed');
                 setError('Google sign-in failed. Please try again.');
               }}
               useOneTap
