@@ -1,0 +1,35 @@
+# Core FastAPI dependencies
+fastapi>=0.68.0,<0.69.0
+uvicorn>=0.15.0,<0.16.0
+pydantic>=1.8.0,<2.0.0
+starlette>=0.14.2,<0.15.0
+fastapi-utils>=0.2.1
+# Web scraping and parsing
+beautifulsoup4>=4.9.3,<5.0.0
+lxml>=4.6.3,<5.0.0
+requests>=2.26.0,<3.0.0
+
+# Google API and search
+google-api-python-client
+google-cloud-core
+vertexai
+google-search-results
+
+# Async support
+aiohttp>=3.8.0,<4.0.0
+asyncio>=3.4.3,<4.0.0
+
+# Error handling and retries
+backoff>=1.11.1,<2.0.0
+
+# Production requirements
+gunicorn>=20.1.0,<21.0.0
+python-multipart>=0.0.5,<0.1.0
+typing-extensions>=3.10.0,<4.0.0
+
+# Logging and monitoring
+python-json-logger>=2.0.2,<3.0.0
+
+# Development and testing
+pytest>=6.2.5,<7.0.0
+httpx>=0.18.2,<0.19.0
